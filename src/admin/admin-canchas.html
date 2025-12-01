@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Administrar Canchas | Reserva Canchas</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
+
+<style>
+/* --- BODY Y FONDO --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)),
+    url("https://images.unsplash.com/photo-1471290522770-6538d95f1383?auto=format&fit=crop&w=1600&q=80"),
+    url("https://images.unsplash.com/photo-1551776235-dde6d4829808?auto=format&fit=crop&w=1600&q=80");
+  background-size: cover, 50%, 50%;
+  background-position: center, left top, right top;
+  background-blend-mode: overlay, overlay, overlay;
+  background-attachment: fixed;
+}
+
+/* --- HEADER --- */
+header {
+  background: rgba(0, 77, 64, 0.9);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  flex-wrap: wrap;
+}
+
+.admin-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+}
+
+.btn-volver, .btn-registrar, .btn-eliminar {
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  border: none;
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: 0.3s ease;
+}
+
+.btn-volver { background: transparent; color: #ffd54f; }
+.btn-volver:hover { background: rgba(255,213,79,0.2); }
+
+.btn-registrar { background-color: #00b894; color: #fff; }
+.btn-registrar:hover { background-color: #00997b; }
+
+.btn-eliminar { background-color: #d63031; color: #fff; }
+.btn-eliminar:hover { background-color: #b71c1c; }
+
+/* --- MAIN --- */
+main {
+  flex-grow: 1;
+  padding: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- TARJETAS DE CANCHAS --- */
+#lista-canchas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.8rem;
+}
+
+.cancha-card {
+  background: rgba(25,30,60,0.65);
+  backdrop-filter: blur(6px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cancha-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 30px rgba(0,0,0,0.6);
+}
+
+.cancha-card img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.cancha-card h3 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #ffd54f;
+}
+
+.cancha-card p {
+  color: #ddd;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.cancha-card .btn-editar, .cancha-card .btn-eliminar-card {
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  border: none;
+  transition: 0.3s ease;
+}
+
+.btn-editar { background-color: #00cec9; color: #003; }
+.btn-editar:hover { background-color: #00a6a2; }
+
+.btn-eliminar-card { background-color: #d63031; color: #fff; }
+.btn-eliminar-card:hover { background-color: #b71c1c; }
+
+/* --- MODAL --- */
+#modal-form-cancha {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+#modal-form-cancha.active { display:flex; }
+#modal-form-cancha .modal-content {
+  background: rgba(25,25,50,0.85);
+  backdrop-filter: blur(12px);
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 90%;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.55);
+}
+
+#modal-form-cancha form label { color: #ffd54f; }
+#modal-form-cancha form input, 
+#modal-form-cancha form select { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding:0.5rem; border-radius:6px; }
+
+#modal-form-cancha form .modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-guardar { background-color: #00b894; color: #fff; }
+.btn-guardar:hover { background-color: #00997b; }
+
+.btn-cancelar { background-color: rgba(255,255,255,0.3); color: #fff; }
+.btn-cancelar:hover { background-color: rgba(255,255,255,0.5); }
+
+/* --- RESPONSIVE --- */
+@media(max-width:600px){
+  header{flex-direction:column; gap:0.5rem;}
+  .btn-volver,.btn-registrar,.btn-eliminar{width:100%;justify-content:center;}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div style="display:flex; align-items:center; gap:1rem;">
+    <button class="btn-volver" onclick="window.location.href='admin.html'" aria-label="Volver al panel administrativo">
+      <i class="bi bi-arrow-left"></i> Atrás
+    </button>
+    <div class="admin-title">⚽ Gestión de Canchas - Hepsú</div>
+  </div>
+  <div style="display:flex; gap:0.5rem; flex-wrap: wrap;">
+    <button onclick="abrirFormularioCancha()" class="btn-registrar" aria-label="Registrar nueva cancha">
+      <i class="bi bi-plus-circle"></i> Registrar Cancha
+    </button>
+    <button onclick="logout()" class="btn-eliminar" aria-label="Cerrar sesión">
+      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </button>
+  </div>
+</header>
+
+<main>
+  <div id="lista-canchas" aria-live="polite" aria-label="Lista de canchas disponibles"></div>
+  <div id="modal-form-cancha" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title"></div>
+</main>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="../common/js/firebase-config.js"></script>
+<script src="../common/js/auth.js"></script>
+
+<script>
+// Variables globales
+const listaCanchas = document.getElementById('lista-canchas');
+const modalForm = document.getElementById('modal-form-cancha');
+let formSubmitListener=null, btnCerrarListener=null, overlayClickListener=null, escKeyListener=null;
+
+// Escapa HTML
+function escapeHtml(text){
+  if(!text) return '';
+  return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+             .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+// Cargar canchas desde Firestore
+async function cargarCanchas(){
+  listaCanchas.innerHTML='<p>Cargando canchas...</p>';
+  try{
+    const snapshot = await db.collection('canchas').where('lugar','==','Hepsú').get();
+    if(snapshot.empty){ listaCanchas.innerHTML='<p>No hay canchas registradas.</p>'; return; }
+    listaCanchas.innerHTML='';
+    snapshot.forEach(doc=>{
+      const cancha={id:doc.id, ...doc.data()};
+      listaCanchas.appendChild(crearCardCancha(cancha));
+    });
+  }catch(e){ console.error(e); listaCanchas.innerHTML='<p style="color:red;">Error al cargar canchas.</p>'; }
+}
+
+// Crear tarjeta de cancha
+function crearCardCancha(cancha){
+  const card=document.createElement('div');
+  card.className='cancha-card';
+  card.innerHTML=`
+    ${cancha.imagen ? `<img src="${cancha.imagen}" alt="${escapeHtml(cancha.nombre)}"/>` : ''}
+    <h3>${escapeHtml(cancha.nombre)} (${escapeHtml(cancha.tipo)})</h3>
+    <p><strong>Descripción:</strong> ${escapeHtml(cancha.descripcion)}</p>
+    <p><strong>Precio Día:</strong> S/ ${cancha.precioDia?.toFixed(2)||'0.00'}</p>
+    <p><strong>Precio Noche:</strong> S/ ${cancha.precioNoche?.toFixed(2)||'0.00'}</p>
+    <p><strong>Disponibilidad:</strong> ${cancha.disponibilidad?'Disponible':'No disponible'}</p>
+    <div style="display:flex; gap:0.5rem; margin-top:auto;">
+      <button class="btn-editar"> <i class="bi bi-pencil-square"></i> Editar </button>
+      <button class="btn-eliminar-card"> <i class="bi bi-trash"></i> Eliminar </button>
+    </div>
+  `;
+  card.querySelector('.btn-editar').addEventListener('click',()=>abrirFormularioCancha(cancha));
+  card.querySelector('.btn-eliminar-card').addEventListener('click',()=>eliminarCancha(cancha));
+  return card;
+}
+
+// Abrir modal de registro/edición
+function abrirFormularioCancha(canchaEditar){
+  document.body.style.overflow='hidden';
+  const isEdit = Boolean(canchaEditar);
+  modalForm.innerHTML=`
+    <div class="modal-overlay" tabindex="-1"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="0">
+      <h2 id="modal-title">${isEdit?'Editar Cancha':'Registrar Nueva Cancha'}</h2>
+      <form id="form-cancha" novalidate>
+        <label for="tipo">Tipo de Cancha:</label>
+        <select id="tipo" name="tipo" required>
+          <option value="">Selecciona un tipo</option>
+          <option value="Fútbol" ${canchaEditar?.tipo==='Fútbol'?'selected':''}>Fútbol</option>
+          <option value="Vóley" ${canchaEditar?.tipo==='Vóley'?'selected':''}>Vóley</option>
+        </select>
+
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" name="descripcion" required autocomplete="off" value="${canchaEditar?.descripcion||''}" />
+
+        <label for="precio-dia">Precio Día (S/):</label>
+        <input type="number" id="precio-dia" name="precioDia" min="0" step="0.1" required autocomplete="off" value="${canchaEditar?.precioDia||''}" />
+
+        <label for="precio-noche">Precio Noche (S/):</label>
+        <input type="number" id="precio-noche" name="precioNoche" min="0" step="0.1" required autocomplete="off" value="${canchaEditar?.precioNoche||''}" />
+
+        <label for="imagen">Imagen (opcional):</label>
+        <input type="file" id="imagen" accept="image/*" />
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-guardar">${isEdit?'Guardar':'Registrar'}</button>
+          <button type="button" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  const form=modalForm.querySelector('#form-cancha');
+  if(formSubmitListener) form.removeEventListener('submit',formSubmitListener);
+  formSubmitListener=async e=>{ e.preventDefault(); await guardarCancha(canchaEditar); };
+  form.addEventListener('submit',formSubmitListener);
+
+  const btnCancelar=modalForm.querySelector('.btn-cancelar');
+  if(btnCerrarListener) btnCancelar.removeEventListener('click',btnCerrarListener);
+  btnCerrarListener=()=>cerrarFormularioCancha();
+  btnCancelar.addEventListener('click',btnCerrarListener);
+
+  const overlay=modalForm.querySelector('.modal-overlay');
+  if(overlayClickListener) overlay.removeEventListener('click',overlayClickListener);
+  overlayClickListener=()=>cerrarFormularioCancha();
+  overlay.addEventListener('click',overlayClickListener);
+
+  if(escKeyListener) document.removeEventListener('keydown',escKeyListener);
+  escKeyListener=e=>{if(e.key==='Escape') cerrarFormularioCancha();};
+  document.addEventListener('keydown',escKeyListener);
+
+  const primerInput=modalForm.querySelector('select');
+  if(primerInput) primerInput.focus();
+  modalForm.classList.add('active');
+  modalForm.setAttribute('aria-hidden','false');
+}
+
+// Optimización de imagen
+function optimizeImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = event=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const canvas=document.createElement('canvas');
+        const maxDim = 800;
+        let w = img.width, h = img.height;
+        if(w>h && w>maxDim){ h*=maxDim/w; w=maxDim; }
+        else if(h>w && h>maxDim){ w*=maxDim/h; h=maxDim; }
+        else if(w>maxDim){ w=h=maxDim; }
+        canvas.width=w; canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        const dataURL = canvas.toDataURL('image/jpeg',0.7);
+        resolve(dataURL);
+      };
+      img.onerror = reject;
+      img.src = event.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Cerrar modal
+function cerrarFormularioCancha(){
+  modalForm.classList.remove('active');
+  modalForm.setAttribute('aria-hidden','true');
+  modalForm.innerHTML='';
+  document.body.style.overflow='auto';
+  formSubmitListener=null; btnCerrarListener=null; overlayClickListener=null;
+  if(escKeyListener){ document.removeEventListener('keydown',escKeyListener); escKeyListener=null; }
+}
+
+// Guardar cancha en Firestore
+async function guardarCancha(canchaEditar){
+  const tipo=document.getElementById('tipo').value;
+  const descripcion=document.getElementById('descripcion').value.trim();
+  const precioDia=parseFloat(document.getElementById('precio-dia').value);
+  const precioNoche=parseFloat(document.getElementById('precio-noche').value);
+  const file = document.getElementById('imagen').files[0];
+
+  if(!tipo || !descripcion || isNaN(precioDia) || isNaN(precioNoche)){
+    alert('Por favor completa todos los campos.');
+    return;
+  }
+
+  let imagenData = canchaEditar?.imagen || '';
+  if(file) {
+    try{ imagenData = await optimizeImage(file); }
+    catch(e){ console.error(e); alert('No se pudo procesar la imagen'); return; }
+  }
+
+  const nombre = tipo==='Fútbol'?'Cancha de Fútbol':'Cancha de Vóley';
+
+  try{
+    if(canchaEditar){
+      await db.collection('canchas').doc(canchaEditar.id)
+        .update({nombre,tipo,descripcion,precioDia,precioNoche,disponibilidad:true,lugar:'Hepsú', imagen:imagenData});
+      alert('Cancha actualizada correctamente.');
+    }else{
+      const query=await db.collection('canchas').where('nombre','==',nombre).limit(1).get();
+      if(!query.empty){ alert('Ya existe la cancha: '+nombre); return; }
+      await db.collection('canchas').add({nombre,tipo,descripcion,precioDia,precioNoche,disponibilidad:true,lugar:'Hepsú', imagen:imagenData});
+      alert('Cancha registrada correctamente.');
+    }
+    cerrarFormularioCancha();
+    cargarCanchas();
+  }catch(e){ console.error(e); alert('Error al guardar la cancha.'); }
+}
+
+// Eliminar cancha
+async function eliminarCancha(cancha){
+  if(confirm(`¿Estás seguro de eliminar la cancha "${cancha.nombre}"?`)){
+    try{
+      await db.collection('canchas').doc(cancha.id).delete();
+      alert('Cancha eliminada correctamente.');
+      cargarCanchas();
+    }catch(e){ console.error(e); alert('Error al eliminar la cancha.'); }
+  }
+}
+
+// Logout
+function logout(){
+  firebase.auth().signOut().then(()=>{ window.location.href='../../index.html'; });
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded',()=>{
+  if(!window.firebase){ alert('Firebase no está cargado correctamente.'); throw new Error('Firebase no está definido'); }
+  if(!window.db) window.db=firebase.firestore();
+  cargarCanchas();
+});
+</script>
+</body>
+</html>
